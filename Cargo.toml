@@ -1,0 +1,6 @@
+[package]
+name = "browser-history"
+version = "0.1.0"
+authors = ["Adam Lesperance <lespea@gmail.com>"]
+
+[dependencies]

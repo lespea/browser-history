@@ -1,0 +1,5 @@
+reorder_imports = true
+wrap_comments = true
+write_mode = "overwrite"
+max_width = 140
+ideal_width = 120
