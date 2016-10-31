@@ -1,4 +1,10 @@
+#![feature(conservative_impl_trait)]
+
 pub mod profiles;
+
+use std::io;
+use std::iter::Iterator;
+use std::path::PathBuf;
 
 #[cfg(windows)]
 pub mod platform {
@@ -6,17 +12,33 @@ pub mod platform {
     pub use self::windows::get_profiles_iter;
 }
 
-pub use platform::get_profiles_iter;
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn get_profiles() -> Result<impl Iterator<Item=PathBuf>, io::Error> {
+    platform::get_profiles_iter().map(|dir_iter| {
+        dir_iter.filter_map(|dir| {
+            dir.ok()
+                .and_then(|path| {
+                    path.metadata()
+                        .ok()
+                        .and_then(|info| if info.is_dir() {
+                            Some(path.path())
+                        } else {
+                            None
+                        })
+                })
+        })
+    })
+}
 
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
     use std::env;
-    use super::get_profiles_iter;
+    use super::get_profiles;
 
     #[test]
     fn has_profiles() {
-        match get_profiles_iter() {
+        match get_profiles() {
             Err(e) => panic!(e),
             Ok(mut dirs) => assert!(dirs.next().is_some()),
         }
@@ -34,24 +56,15 @@ mod tests {
             }
             if expected.len() > 0 {
                 let mut found = HashSet::with_capacity(expected.len());
-                match get_profiles_iter() {
+                match get_profiles() {
                     Err(e) => panic!(e),
                     Ok(dirs) => {
                         for dir in dirs {
-                            match dir {
-                                Err(e) => panic!(e),
-                                Ok(path) => {
-                                    if let Ok(info) = path.metadata() {
-                                        if info.is_dir() {
-                                            let profile = path.file_name().into_string().unwrap();
-                                            assert!(expected.contains(&profile),
-                                                    "Didn't find the profile '{}'",
-                                                    profile);
-                                            found.insert(profile);
-                                        }
-                                    }
-                                }
-                            };
+                            let name = dir.file_name().unwrap().to_str().unwrap().to_string();
+                            assert!(expected.contains(&name),
+                                    "Didn't find the profile '{}'",
+                                    name);
+                            found.insert(name);
                         }
                     }
                 };
