@@ -4,3 +4,11 @@ version = "0.1.0"
 authors = ["Adam Lesperance <lespea@gmail.com>"]
 
 [dependencies]
+
+[profile.release]
+debug            = false
+debug-assertions = false
+lto              = true
+opt-level        = 3
+panic            = "abort"
+rpath            = false
