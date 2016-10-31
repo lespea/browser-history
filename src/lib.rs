@@ -9,15 +9,15 @@ use std::path::PathBuf;
 #[cfg(windows)]
 pub mod platform {
     mod windows;
-    pub use self::windows::get_profiles_iter;
+    pub use self::windows::get_user_profiles_iter;
 }
 
 // Must mark this inline to get around a compiler but with returns impl
 // https://github.com/rust-lang/rust/issues/35870
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[inline]
-pub fn get_profiles() -> Result<impl Iterator<Item=PathBuf>, io::Error> {
-    platform::get_profiles_iter().map(|dir_iter| {
+pub fn get_users_profiles() -> Result<impl Iterator<Item=PathBuf>, io::Error> {
+    platform::get_user_profiles_iter().map(|dir_iter| {
         dir_iter.filter_map(|dir| {
             dir.ok()
                 .and_then(|path| {
@@ -37,11 +37,11 @@ pub fn get_profiles() -> Result<impl Iterator<Item=PathBuf>, io::Error> {
 mod tests {
     use std::collections::HashSet;
     use std::env;
-    use super::get_profiles;
+    use super::get_users_profiles;
 
     #[test]
     fn has_profiles() {
-        match get_profiles() {
+        match get_users_profiles() {
             Err(e) => panic!(e),
             Ok(mut dirs) => assert!(dirs.next().is_some()),
         }
@@ -59,7 +59,7 @@ mod tests {
             }
             if expected.len() > 0 {
                 let mut found = HashSet::with_capacity(expected.len());
-                match get_profiles() {
+                match get_users_profiles() {
                     Err(e) => panic!(e),
                     Ok(dirs) => {
                         for dir in dirs {
