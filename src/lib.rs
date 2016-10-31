@@ -12,6 +12,12 @@ pub mod platform {
     pub use self::windows::get_user_profiles_iter;
 }
 
+#[cfg(unix)]
+pub mod platform {
+    mod unix;
+    pub use self::unix::get_user_profiles_iter;
+}
+
 // Must mark this inline to get around a compiler bug with returns impl
 // https://github.com/rust-lang/rust/issues/35870
 #[cfg_attr(rustfmt, rustfmt_skip)]
