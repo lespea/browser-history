@@ -40,7 +40,7 @@ mod tests {
     use super::get_users_profiles;
 
     #[test]
-    fn has_profiles() {
+    fn has_user_profiles() {
         match get_users_profiles() {
             Err(e) => panic!(e),
             Ok(mut dirs) => assert!(dirs.next().is_some()),
@@ -51,7 +51,7 @@ mod tests {
     // just the base dir names that you expect to find.  If this is not found or empty
     // then the test isn't run
     #[test]
-    fn exptected_profiles() {
+    fn exptected_user_profiles() {
         if let Ok(paths) = env::var("BROWSER_HISTORY_EXPECTED_USERS") {
             let mut expected = HashSet::with_capacity(64);
             for path in paths.split(',') {
