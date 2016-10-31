@@ -12,7 +12,10 @@ pub mod platform {
     pub use self::windows::get_profiles_iter;
 }
 
+// Must mark this inline to get around a compiler but with returns impl
+// https://github.com/rust-lang/rust/issues/35870
 #[cfg_attr(rustfmt, rustfmt_skip)]
+#[inline]
 pub fn get_profiles() -> Result<impl Iterator<Item=PathBuf>, io::Error> {
     platform::get_profiles_iter().map(|dir_iter| {
         dir_iter.filter_map(|dir| {
@@ -62,7 +65,7 @@ mod tests {
                         for dir in dirs {
                             let name = dir.file_name().unwrap().to_str().unwrap().to_string();
                             assert!(expected.contains(&name),
-                                    "Didn't find the profile '{}'",
+                                    "Found this unknown profile '{}'",
                                     name);
                             found.insert(name);
                         }
